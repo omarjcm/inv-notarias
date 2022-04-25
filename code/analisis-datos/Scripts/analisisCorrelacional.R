@@ -24,7 +24,7 @@ datos_vi <- datos %>%
   dplyr::select(VI_01_antes, VI_01_despues) %>% 
   dplyr::filter(!is.na(VI_01_antes) & !is.na(VI_01_despues))
 glimpse(datos_vi)
-View(datos_vi)
+
 unique(datos_vi$VI_01_antes)
 unique(datos_vi$VI_01_despues)
 
@@ -37,26 +37,93 @@ unique(datos_vi$VI_01_despues)
 
 items_vd <- likert( items = datos_vi )
 
+glimpse(datos)
+
 datos <- datos %>% 
   mutate(
+    P_1 = parse_factor(P_1),
+    P_2 = parse_factor(P_2),
+    P_3 = parse_factor(P_3),
+    P_4 = parse_factor(P_4),
     VI_01_antes = parse_factor(VI_01_antes, levels = likert_valores),
     VI_01_despues = parse_factor(VI_01_despues, levels = likert_valores),
-    VI_02_antes = parse_factor(VI_02_antes, levels = dispositivos),
-    VI_02_despues = parse_factor(VI_02_despues, levels = dispositivos),
-    VI_03_antes = parse_factor(VI_03_antes, levels = recurso_tecnologico),
-    VI_03_despues = parse_factor(VI_03_despues, levels = recurso_tecnologico),
-    VD_01_antes = parse_factor(VD_01_antes, levels = num_clientes),
-    VD_01_despues = parse_factor(VD_01_despues, levels = num_clientes),
+    VI_02_antes = parse_factor(VI_02_antes),
+    VI_02_despues = parse_factor(VI_02_despues),
+    VI_03_antes = parse_factor(VI_03_antes),
+    VI_03_despues = parse_factor(VI_03_despues),
+    VD_01_antes = parse_factor(VD_01_antes),
+    VD_01_despues = parse_factor(VD_01_despues),
     #VD_02_antes = parse_factor(VD_02_antes, levels = facturacion_mensual),
-    VD_02_despues = parse_factor(VD_02_despues, levels = facturacion_mensual),
-    VD_03 = parse_factor(VD_03, levels = pagos_servicios),
-    VD_04 = parse_factor(VD_04, levels = metodo_facturacion),
+    VD_02_despues = parse_factor(VD_02_despues),
+    VD_03 = parse_factor(VD_03),
+    VD_04 = parse_factor(VD_04),
     VD_05 = parse_factor(VD_05, levels = likert_valores),
     VD_06 = parse_factor(VD_06, levels = likert_valores),
     VD_07 = parse_factor(VD_07, levels = likert_valores),
     VD_08 = parse_factor(VD_08, levels = likert_valores),
     VD_09 = parse_factor(VD_09, levels = likert_valores)
   )
+
+glimpse(datos)
+
+
+library(ggplot2)
+
+datos %>% 
+  ggplot(aes(x=P_1, fill=reorder(P_3))) +
+  geom_bar(position = "dodge") +
+  facet_wrap(~reorder(P_2)) +
+  labs(title = "Datos Agrupados por edades de Notarios", 
+       y="Cantidad", 
+       x="Género",
+       fill="Años de actividad Notarial") +
+  theme(legend.position="bottom")
+
+
+datos %>% 
+  ggplot(aes(x=P_1, fill=reorder(P_3))) +
+  geom_bar(position = "dodge") +
+  facet_wrap(~reorder(P_4)) +
+  labs(title = "Datos Agrupados por ubicación de la Notaría", 
+       y="Cantidad", 
+       x="Género",
+       fill="Años de Actividad Notarial") +
+  theme(legend.position="bottom")
+
+
+datos %>% 
+  ggplot(aes(x=VI_01_antes)) +
+  geom_bar()
+
+datos %$%
+  table(VI_01_despues)
+
+datos %>% 
+  filter(VI_01_despues!="<NA>") %>% 
+  ggplot(aes(x=VI_01_despues)) +
+  geom_bar()
+
+
+
+datos %>% 
+  ggplot(aes(x=P_1, fill=P_4)) +
+  geom_bar(position = "dodge") +
+  theme_bw()
+
+
+g2 <- datos %>% 
+  ggplot(aes(x=P_2)) +
+  geom_bar() +
+  theme(legend.position="none")
+g3 <- datos %>% 
+  ggplot(aes(x=P_3)) +
+  geom_bar() +
+  theme(legend.position="none")
+
+
+library("cowplot")
+
+plot_grid(g1, g2, g3, labels = c("", ""), ncol = 3, nrow = 1)
 
 
 library('DescTools')
@@ -78,9 +145,9 @@ vi_03_despues_vd_05 <- table(datos$VI_03_despues, datos$VD_05)
 chisq.test(vi_03_despues_vd_05)
 fisher.test(vi_03_despues_vd_05)
 
-vi_04_antes_vd_05 <- table(datos$VI_04_antes, datos$VD_05)
-chisq.test(vi_04_antes_vd_05)
-fisher.test(vi_04_antes_vd_05)
+vi_04_vd_05 <- table(datos$VD_04, datos$VD_05)
+chisq.test(vi_04_vd_05)
+fisher.test(vi_04_vd_05)
 
 
 vi_01_antes_vd_05 <- as.table(rbind(datos$VI_01_antes, datos$VD_05))
